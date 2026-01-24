@@ -9,9 +9,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-muted/30">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
+    <div className="h-screen flex bg-muted/30 overflow-hidden">
+      {/* Desktop Sidebar - Fixed */}
+      <div className="hidden lg:flex flex-shrink-0">
         <Sidebar collapsed={sidebarCollapsed} onCollapsedChange={setSidebarCollapsed} />
       </div>
 
@@ -22,11 +22,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </SheetContent>
       </Sheet>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
+      {/* Main Content - Scrollable */}
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         <TopHeader onMenuClick={() => setMobileMenuOpen(true)} showMenuButton={true} />
-        <div className="flex-1 p-4 lg:p-6 overflow-auto">{children}</div>
-      </main>
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto">{children}</main>
+      </div>
     </div>
   );
 }
