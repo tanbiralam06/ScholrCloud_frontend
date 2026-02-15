@@ -13,6 +13,7 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
+  School,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -29,6 +30,7 @@ import {
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/schools", label: "Schools", icon: School },
   { href: "/dashboard/students", label: "Students", icon: GraduationCap },
   { href: "/dashboard/staff", label: "Staff", icon: Users },
   { href: "/dashboard/fees", label: "Fees", icon: Wallet },
