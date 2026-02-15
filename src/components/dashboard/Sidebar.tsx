@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -28,13 +29,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-const navItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: any;
+  roles?: string[]; // if undefined, visible to all authenticated users
+}
+
+const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/schools", label: "Schools", icon: School },
-  { href: "/dashboard/students", label: "Students", icon: GraduationCap },
-  { href: "/dashboard/staff", label: "Staff", icon: Users },
-  { href: "/dashboard/fees", label: "Fees", icon: Wallet },
-  { href: "/dashboard/settings", label: "Settings", icon: Settings },
+  { href: "/admin/schools", label: "Schools", icon: School, roles: ["super_admin"] },
+  { href: "/dashboard/students", label: "Students", icon: GraduationCap, roles: ["school_admin", "principal", "teacher"] },
+  { href: "/dashboard/staff", label: "Staff", icon: Users, roles: ["school_admin", "principal"] },
+  { href: "/dashboard/fees", label: "Fees", icon: Wallet, roles: ["school_admin", "accountant"] },
+  { href: "/dashboard/settings", label: "Settings", icon: Settings, roles: ["school_admin", "super_admin"] },
 ];
 
 interface SidebarProps {
@@ -44,11 +52,41 @@ interface SidebarProps {
 
 export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>("");
+
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        setUserRole(user.role);
+        setUserEmail(user.email || "");
+      } catch { /* ignore parse errors */ }
+    }
+  }, []);
 
   const isActive = (href: string) => {
     if (href === "/dashboard") return pathname === href;
     return pathname.startsWith(href);
   };
+
+  // Filter nav items based on user role
+  const filteredNavItems = navItems.filter((item) => {
+    if (!item.roles) return true; // visible to all
+    if (!userRole) return false;  // hide role-restricted items if role unknown
+    return item.roles.includes(userRole);
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    router.push("/login");
+  };
+
+  const userInitials = userEmail ? userEmail.substring(0, 2).toUpperCase() : "AD";
+  const displayRole = userRole ? userRole.replace("_", " ").replace(/\b\w/g, (l: string) => l.toUpperCase()) : "User";
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -89,7 +127,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 py-2 px-2 space-y-1">
-          {navItems.map((item) => {
+          {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
 
@@ -181,7 +219,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                       <Avatar className="h-8 w-8">
                         <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
                         <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                          AD
+                          {userInitials}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
@@ -197,11 +235,11 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                   <Avatar className="h-7 w-7">
                     <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
                     <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                      AD
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium">Admin</p>
+                    <p className="text-sm font-medium">{displayRole}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -209,23 +247,26 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
             <DropdownMenuContent side="right" align="end" className="w-56">
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@school.com</p>
+                  <p className="text-sm font-medium">{displayRole}</p>
+                  <p className="text-xs text-muted-foreground">{userEmail}</p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/settings">Profile Settings</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">School Settings</Link>
-              </DropdownMenuItem>
+              {userRole !== "super_admin" && (
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/settings">School Settings</Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild className="text-destructive focus:text-destructive">
-                <Link href="/login">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Link>
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive cursor-pointer"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AddSchoolDialog } from "@/components/admin/AddSchoolDialog";
 import {
   Table,
@@ -26,8 +27,26 @@ interface SchoolType {
 }
 
 export default function SchoolsPage() {
+  const router = useRouter();
   const [schools, setSchools] = useState<SchoolType[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Route guard: only super_admin can access this page
+  useEffect(() => {
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        if (user.role !== "super_admin") {
+          router.replace("/dashboard");
+        }
+      } catch {
+        router.replace("/login");
+      }
+    } else {
+      router.replace("/login");
+    }
+  }, [router]);
 
   const fetchSchools = async () => {
     try {
