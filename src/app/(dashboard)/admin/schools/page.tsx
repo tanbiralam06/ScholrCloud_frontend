@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import axios from "axios";
+import { api } from "@/lib/api";
 import { School } from "lucide-react";
 
 interface SchoolType {
@@ -31,15 +31,7 @@ export default function SchoolsPage() {
 
   const fetchSchools = async () => {
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/v1/schools`,
-        {
-           headers: {
-            Authorization: `Bearer ${token}`
-           }
-        }
-      );
+      const response = await api.get("/schools");
       setSchools(response.data.data);
     } catch (error) {
       console.error("Failed to fetch schools", error);

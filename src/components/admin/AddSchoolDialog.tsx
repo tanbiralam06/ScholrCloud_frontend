@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "../../hooks/use-toast";
 import { Plus } from "lucide-react";
-import axios from "axios";
+import { api } from "@/lib/api";
 
 const formSchema = z.object({
   name: z.string().min(2, "School name must be at least 2 characters"),
@@ -58,14 +58,7 @@ export function AddSchoolDialog({ onSuccess }: { onSuccess: () => void }) {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Retrieve token from localStorage (assuming it's stored there after login)
-      const token = localStorage.getItem("token"); 
-
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/v1/schools`, values, {
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-      });
+      await api.post("/schools", values);
 
       toast({
         title: "Success",
