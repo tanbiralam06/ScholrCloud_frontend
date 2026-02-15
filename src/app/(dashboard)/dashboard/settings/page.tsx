@@ -1,6 +1,7 @@
 "use client";
 
-import { Save, Upload } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Save, Upload, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,23 +16,116 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Link from "next/link";
+import { api } from "@/lib/api";
 
-// Dummy school data
-const school = {
-  name: "Delhi Public School",
-  code: "DPS-DEL-001",
-  email: "info@dpschool.edu.in",
-  phone: "+91 11 2345 6789",
-  address: "Sector 24, Dwarka, New Delhi - 110077",
-  city: "New Delhi",
-  state: "Delhi",
-  country: "India",
-  subscriptionPlan: "pro",
-  academicYearStart: "April",
-};
+interface SchoolProfile {
+  id: string;
+  name: string;
+  code: string;
+  email: string;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  country: string | null;
+  logoUrl: string | null;
+  subscriptionPlan: string;
+  subscriptionStatus: string;
+  academicYearStart: string | null;
+  timezone: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+}
 
 export default function SettingsPage() {
+  const [school, setSchool] = useState<SchoolProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Form state
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    state: "",
+    country: "",
+    timezone: "Asia/Kolkata",
+    academicYearStart: "april",
+  });
+
+  useEffect(() => {
+    fetchSchool();
+  }, []);
+
+  const fetchSchool = async () => {
+    try {
+      const response = await api.get("/schools/me");
+      const data = response.data.data;
+      setSchool(data);
+      setForm({
+        name: data.name || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        address: data.address || "",
+        city: data.city || "",
+        state: data.state || "",
+        country: data.country || "India",
+        timezone: data.timezone || "Asia/Kolkata",
+        academicYearStart: data.academicYearStart ? "april" : "april",
+      });
+    } catch (error) {
+      console.error("Failed to fetch school profile", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setMessage(null);
+
+    try {
+      const response = await api.put("/schools/me", form);
+      setSchool(response.data.data);
+      setMessage({ type: "success", text: "School profile updated successfully!" });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error: any) {
+      setMessage({
+        type: "error",
+        text: error.response?.data?.message || "Failed to update school profile.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <PageHeader title="Settings" description="Manage your school profile and preferences" />
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </div>
+    );
+  }
+
+  const schoolInitials = school?.name
+    ? school.name.split(" ").map((w) => w[0]).join("").substring(0, 3).toUpperCase()
+    : "SCH";
+
+  const planLabel = school?.subscriptionPlan
+    ? school.subscriptionPlan.charAt(0).toUpperCase() + school.subscriptionPlan.slice(1) + " Plan"
+    : "Basic Plan";
+
   return (
     <div className="space-y-6">
       <PageHeader title="Settings" description="Manage your school profile and preferences" />
@@ -44,15 +138,28 @@ export default function SettingsPage() {
         </TabsList>
 
         <TabsContent value="school">
-          <form className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Status Message */}
+            {message && (
+              <div
+                className={`p-3 rounded-md text-sm ${
+                  message.type === "success"
+                    ? "bg-green-500/10 text-green-600 border border-green-500/20"
+                    : "bg-destructive/10 text-destructive border border-destructive/20"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
+
             {/* Logo */}
             <div className="bg-card border rounded-xl p-6">
               <h3 className="font-semibold mb-4">School Logo</h3>
               <div className="flex items-center gap-6">
                 <Avatar className="h-24 w-24">
-                  <AvatarImage src="/school-logo.png" />
+                  <AvatarImage src={school?.logoUrl || "/school-logo.png"} />
                   <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                    DPS
+                    {schoolInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
@@ -74,19 +181,29 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>School Name *</Label>
-                  <Input defaultValue={school.name} />
+                  <Input
+                    value={form.name}
+                    onChange={(e) => handleChange("name", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>School Code</Label>
-                  <Input defaultValue={school.code} disabled className="bg-muted" />
+                  <Input value={school?.code || ""} disabled className="bg-muted" />
                 </div>
                 <div className="space-y-2">
                   <Label>Email *</Label>
-                  <Input type="email" defaultValue={school.email} />
+                  <Input
+                    type="email"
+                    value={form.email}
+                    onChange={(e) => handleChange("email", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Phone</Label>
-                  <Input defaultValue={school.phone} />
+                  <Input
+                    value={form.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                  />
                 </div>
               </div>
             </div>
@@ -98,26 +215,47 @@ export default function SettingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2 md:col-span-2">
                   <Label>Street Address</Label>
-                  <Input defaultValue={school.address} />
+                  <Input
+                    value={form.address}
+                    onChange={(e) => handleChange("address", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>City</Label>
-                  <Input defaultValue={school.city} />
+                  <Input
+                    value={form.city}
+                    onChange={(e) => handleChange("city", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>State</Label>
-                  <Input defaultValue={school.state} />
+                  <Input
+                    value={form.state}
+                    onChange={(e) => handleChange("state", e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Country</Label>
-                  <Input defaultValue={school.country} />
+                  <Input
+                    value={form.country}
+                    onChange={(e) => handleChange("country", e.target.value)}
+                  />
                 </div>
               </div>
             </div>
 
-            <Button type="submit" size="lg">
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
+            <Button type="submit" size="lg" disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              )}
             </Button>
           </form>
         </TabsContent>
@@ -129,7 +267,10 @@ export default function SettingsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
               <div className="space-y-2">
                 <Label>Academic Year Starts</Label>
-                <Select defaultValue="april">
+                <Select
+                  value={form.academicYearStart}
+                  onValueChange={(v) => handleChange("academicYearStart", v)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -143,20 +284,32 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 <Label>Timezone</Label>
-                <Select defaultValue="asia_kolkata">
+                <Select
+                  value={form.timezone}
+                  onValueChange={(v) => handleChange("timezone", v)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="asia_kolkata">Asia/Kolkata (IST)</SelectItem>
-                    <SelectItem value="utc">UTC</SelectItem>
+                    <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
+                    <SelectItem value="UTC">UTC</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
-            <Button>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
+            <Button onClick={handleSubmit} disabled={saving}>
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              )}
             </Button>
           </div>
         </TabsContent>
@@ -166,15 +319,19 @@ export default function SettingsPage() {
             <h3 className="font-semibold">Current Plan</h3>
             <div className="flex items-center gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
               <div className="flex-1">
-                <p className="font-semibold text-lg">Pro Plan</p>
+                <p className="font-semibold text-lg">{planLabel}</p>
                 <p className="text-sm text-muted-foreground">
-                  Unlimited students · Advanced reports · Priority support
+                  {school?.subscriptionPlan === "pro"
+                    ? "Unlimited students · Advanced reports · Priority support"
+                    : school?.subscriptionPlan === "enterprise"
+                      ? "Everything in Pro · Custom integrations · Dedicated support"
+                      : "Up to 500 students · Basic reports · Email support"}
                 </p>
               </div>
               <Button variant="outline">Manage Subscription</Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              Your subscription renews on April 1, 2024
+              Status: <span className="font-medium capitalize">{school?.subscriptionStatus}</span>
             </p>
           </div>
         </TabsContent>
