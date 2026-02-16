@@ -261,58 +261,95 @@ export default function SectionsPage() {
           )}
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {Object.entries(groupedSections).map(([className, secs]) => (
-            <div key={className} className="bg-card border rounded-xl overflow-hidden">
-              <div className="px-5 py-3 bg-muted/50 border-b">
-                <h3 className="font-semibold text-sm flex items-center gap-2">
+            <div key={className}>
+              {/* Class Group Header */}
+              <div className="flex items-center gap-2 mb-4">
+                <div className="p-1.5 rounded-md bg-primary/10">
                   <LayoutGrid className="w-4 h-4 text-primary" />
-                  {className}
-                  <span className="text-xs text-muted-foreground font-normal">
-                    ({secs.length} section{secs.length !== 1 ? "s" : ""})
-                  </span>
-                </h3>
+                </div>
+                <h3 className="font-semibold">{className}</h3>
+                <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                  {secs.length} section{secs.length !== 1 ? "s" : ""}
+                </span>
               </div>
-              <div className="divide-y">
-                {secs.map((sec) => (
-                  <div
-                    key={sec.id}
-                    className="flex items-center justify-between px-5 py-3 hover:bg-muted/30 transition-colors"
-                  >
-                    <div>
-                      <p className="font-medium">Section {sec.name}</p>
-                      <p className="text-xs text-muted-foreground">
+
+              {/* Section Cards Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {secs.map((sec) => {
+                  const capacity = sec.maxStudents ?? 40;
+                  const enrolled = 0; // placeholder until student enrollment
+                  const percentage = capacity > 0 ? (enrolled / capacity) * 100 : 0;
+
+                  return (
+                    <div
+                      key={sec.id}
+                      className="group bg-card border rounded-xl p-5 hover:shadow-lg hover:border-primary/30 transition-all duration-300 relative"
+                    >
+                      {/* Top Row: Icon + Actions */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <LayoutGrid className="w-5 h-5 text-primary" />
+                        </div>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => openEditDialog(sec)}
+                            id={`edit-section-${sec.id}`}
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            onClick={() => openDeleteDialog(sec)}
+                            id={`delete-section-${sec.id}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Section Name */}
+                      <h4 className="font-semibold text-lg">Section {sec.name}</h4>
+                      <p className="text-xs text-muted-foreground mt-0.5">
                         {className} – {sec.name}
                       </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 text-sm text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md">
-                        <Users className="w-3.5 h-3.5" />
-                        <span>0 / {sec.maxStudents ?? 40}</span>
-                      </div>
-                      <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => openEditDialog(sec)}
-                        id={`edit-section-${sec.id}`}
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => openDeleteDialog(sec)}
-                        id={`delete-section-${sec.id}`}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
+
+                      {/* Capacity Bar */}
+                      <div className="mt-4 space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Users className="w-3.5 h-3.5" />
+                            <span>Students</span>
+                          </div>
+                          <span className="font-medium text-xs">
+                            {enrolled} / {capacity}
+                          </span>
+                        </div>
+                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+
+                {/* Add Section Card */}
+                <button
+                  onClick={openCreateDialog}
+                  className="border-2 border-dashed border-muted-foreground/20 rounded-xl p-5 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all duration-300 min-h-[180px] cursor-pointer"
+                >
+                  <Plus className="w-6 h-6" />
+                  <span className="text-sm font-medium">Add Section</span>
+                </button>
               </div>
             </div>
           ))}
