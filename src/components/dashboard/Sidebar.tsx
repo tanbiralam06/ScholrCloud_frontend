@@ -18,6 +18,7 @@ import {
   BookOpen,
   ChevronDown,
   Layers,
+  Database,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -58,6 +59,7 @@ const navItems: NavItem[] = [
       { href: "/dashboard/academics/sections", label: "Sections", icon: Layers },
     ],
   },
+  { href: "/dashboard/master-data", label: "Master Data", icon: Database, roles: ["school_admin"] },
   { href: "/dashboard/students", label: "Students", icon: GraduationCap, roles: ["school_admin", "principal", "teacher"] },
   { href: "/dashboard/staff", label: "Staff", icon: Users, roles: ["school_admin", "principal"] },
   { href: "/dashboard/fees", label: "Fees", icon: Wallet, roles: ["school_admin", "accountant"] },
