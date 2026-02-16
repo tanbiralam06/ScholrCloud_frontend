@@ -15,6 +15,7 @@ import {
   ChevronLeft,
   ChevronRight,
   School,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -39,6 +40,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/schools", label: "Schools", icon: School, roles: ["super_admin"] },
+  { href: "/dashboard/academics/classes", label: "Academics", icon: BookOpen, roles: ["school_admin", "principal"] },
   { href: "/dashboard/students", label: "Students", icon: GraduationCap, roles: ["school_admin", "principal", "teacher"] },
   { href: "/dashboard/staff", label: "Staff", icon: Users, roles: ["school_admin", "principal"] },
   { href: "/dashboard/fees", label: "Fees", icon: Wallet, roles: ["school_admin", "accountant"] },
