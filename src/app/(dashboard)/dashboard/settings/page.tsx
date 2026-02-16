@@ -29,6 +29,11 @@ interface SchoolProfile {
   state: string | null;
   country: string | null;
   logoUrl: string | null;
+  estdYear: number | null;
+  board: string | null;
+  affiliationNo: string | null;
+  website: string | null;
+  motto: string | null;
   subscriptionPlan: string;
   subscriptionStatus: string;
   academicYearStart: string | null;
@@ -54,6 +59,11 @@ export default function SettingsPage() {
     country: "",
     timezone: "Asia/Kolkata",
     academicYearStart: "april",
+    estdYear: "",
+    board: "",
+    affiliationNo: "",
+    website: "",
+    motto: "",
   });
 
   useEffect(() => {
@@ -75,6 +85,11 @@ export default function SettingsPage() {
         country: data.country || "India",
         timezone: data.timezone || "Asia/Kolkata",
         academicYearStart: data.academicYearStart ? "april" : "april",
+        estdYear: data.estdYear ? String(data.estdYear) : "",
+        board: data.board || "",
+        affiliationNo: data.affiliationNo || "",
+        website: data.website || "",
+        motto: data.motto || "",
       });
     } catch (error) {
       console.error("Failed to fetch school profile", error);
@@ -93,7 +108,11 @@ export default function SettingsPage() {
     setMessage(null);
 
     try {
-      const response = await api.put("/schools/me", form);
+      const payload = {
+        ...form,
+        estdYear: form.estdYear ? parseInt(form.estdYear, 10) : null,
+      };
+      const response = await api.put("/schools/me", payload);
       setSchool(response.data.data);
       setMessage({ type: "success", text: "School profile updated successfully!" });
       setTimeout(() => setMessage(null), 3000);
@@ -239,6 +258,83 @@ export default function SettingsPage() {
                   <Input
                     value={form.country}
                     onChange={(e) => handleChange("country", e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Institute Profile */}
+            <div className="bg-card border rounded-xl p-6 space-y-4">
+              <h3 className="font-semibold">Institute Profile</h3>
+              <Separator />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Established Year</Label>
+                  <Input
+                    type="number"
+                    placeholder="e.g. 1995"
+                    value={form.estdYear}
+                    onChange={(e) => handleChange("estdYear", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Board / Affiliation</Label>
+                  <Select
+                    value={["CBSE", "ICSE", "State Board", "IB", "Cambridge"].includes(form.board) ? form.board : "Other"}
+                    onValueChange={(v) => {
+                      if (v === "Other") {
+                        handleChange("board", ""); // Clear to allow typing custom board
+                      } else {
+                        handleChange("board", v);
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select board" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CBSE">CBSE</SelectItem>
+                      <SelectItem value="ICSE">ICSE</SelectItem>
+                      <SelectItem value="State Board">State Board</SelectItem>
+                      <SelectItem value="IB">IB</SelectItem>
+                      <SelectItem value="Cambridge">Cambridge</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {/* Show input if custom board (not in standard list) or user explicitly selected Other (which sets it to empty string initially) */}
+                  {(!["CBSE", "ICSE", "State Board", "IB", "Cambridge"].includes(form.board)) && (
+                    <Input
+                      placeholder="Enter Board Name"
+                      value={form.board}
+                      onChange={(e) => handleChange("board", e.target.value)}
+                      className="mt-2"
+                      autoFocus
+                    />
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label>Affiliation Number</Label>
+                  <Input
+                    placeholder="e.g. 3430256"
+                    value={form.affiliationNo}
+                    onChange={(e) => handleChange("affiliationNo", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Website</Label>
+                  <Input
+                    type="url"
+                    placeholder="e.g. https://myschool.edu.in"
+                    value={form.website}
+                    onChange={(e) => handleChange("website", e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Motto / Tagline</Label>
+                  <Input
+                    placeholder="e.g. Knowledge is Power"
+                    value={form.motto}
+                    onChange={(e) => handleChange("motto", e.target.value)}
                   />
                 </div>
               </div>
