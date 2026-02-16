@@ -1,434 +1,91 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Save, Upload, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/dashboard";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { api } from "@/lib/api";
-
-interface SchoolProfile {
-  id: string;
-  name: string;
-  code: string;
-  email: string;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  country: string | null;
-  logoUrl: string | null;
-  estdYear: number | null;
-  board: string | null;
-  affiliationNo: string | null;
-  website: string | null;
-  motto: string | null;
-  subscriptionPlan: string;
-  subscriptionStatus: string;
-  academicYearStart: string | null;
-  timezone: string | null;
-  createdAt: string;
-  updatedAt: string | null;
-}
+import { SchoolProfileForm } from "@/components/dashboard/settings/SchoolProfileForm";
+import { AcademicSettingsForm } from "@/components/dashboard/settings/AcademicSettingsForm";
+import { BillingCard } from "@/components/dashboard/settings/BillingCard";
+import { useSchoolSettings } from "@/hooks/use-school-settings";
+import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export default function SettingsPage() {
-  const [school, setSchool] = useState<SchoolProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const { school, loading, saving, updateSchool } = useSchoolSettings();
 
-  // Form state
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-    city: "",
-    state: "",
-    country: "",
-    timezone: "Asia/Kolkata",
-    academicYearStart: "april",
-    estdYear: "",
-    board: "",
-    affiliationNo: "",
-    website: "",
-    motto: "",
-  });
-
-  useEffect(() => {
-    fetchSchool();
-  }, []);
-
-  const fetchSchool = async () => {
-    try {
-      const response = await api.get("/schools/me");
-      const data = response.data.data;
-      setSchool(data);
-      setForm({
-        name: data.name || "",
-        email: data.email || "",
-        phone: data.phone || "",
-        address: data.address || "",
-        city: data.city || "",
-        state: data.state || "",
-        country: data.country || "India",
-        timezone: data.timezone || "Asia/Kolkata",
-        academicYearStart: data.academicYearStart ? "april" : "april",
-        estdYear: data.estdYear ? String(data.estdYear) : "",
-        board: data.board || "",
-        affiliationNo: data.affiliationNo || "",
-        website: data.website || "",
-        motto: data.motto || "",
-      });
-    } catch (error) {
-      console.error("Failed to fetch school profile", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    setMessage(null);
-
-    try {
-      const payload = {
-        ...form,
-        estdYear: form.estdYear ? parseInt(form.estdYear, 10) : null,
-      };
-      const response = await api.put("/schools/me", payload);
-      setSchool(response.data.data);
-      setMessage({ type: "success", text: "School profile updated successfully!" });
-      setTimeout(() => setMessage(null), 3000);
-    } catch (error: any) {
-      setMessage({
-        type: "error",
-        text: error.response?.data?.message || "Failed to update school profile.",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  if (loading) {
+  if (loading && !school) {
     return (
-      <div className="space-y-6">
-        <PageHeader title="Settings" description="Manage your school profile and preferences" />
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  const schoolInitials = school?.name
-    ? school.name.split(" ").map((w) => w[0]).join("").substring(0, 3).toUpperCase()
-    : "SCH";
-
-  const planLabel = school?.subscriptionPlan
-    ? school.subscriptionPlan.charAt(0).toUpperCase() + school.subscriptionPlan.slice(1) + " Plan"
-    : "Basic Plan";
-
   return (
     <div className="space-y-6">
-      <PageHeader title="Settings" description="Manage your school profile and preferences" />
+      <PageHeader
+        title="Settings"
+        description="Manage your school profile, academic preferences, and billing."
+      />
 
-      <Tabs defaultValue="school" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="school">School Profile</TabsTrigger>
-          <TabsTrigger value="academic">Academic Settings</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="bg-card border p-1 h-auto">
+          <TabsTrigger value="profile" className="px-4 py-2">School Profile</TabsTrigger>
+          <TabsTrigger value="academic" className="px-4 py-2">Academic & Preferences</TabsTrigger>
+          <TabsTrigger value="billing" className="px-4 py-2">Billing & Plans</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="school">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Status Message */}
-            {message && (
-              <div
-                className={`p-3 rounded-md text-sm ${
-                  message.type === "success"
-                    ? "bg-green-500/10 text-green-600 border border-green-500/20"
-                    : "bg-destructive/10 text-destructive border border-destructive/20"
-                }`}
-              >
-                {message.text}
-              </div>
-            )}
-
-            {/* Logo */}
-            <div className="bg-card border rounded-xl p-6">
-              <h3 className="font-semibold mb-4">School Logo</h3>
-              <div className="flex items-center gap-6">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={school?.logoUrl || "/school-logo.png"} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
-                    {schoolInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="space-y-2">
-                  <Button variant="outline" type="button">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Logo
-                  </Button>
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: 200x200px, PNG or JPG
-                  </p>
-                </div>
+        <TabsContent value="profile" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <SchoolProfileForm
+                initialData={school || undefined}
+                onSubmit={updateSchool}
+                isLoading={saving}
+              />
+            </div>
+            <div className="space-y-6">
+              <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 p-4 rounded-xl">
+                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                  Profile Tips
+                </h4>
+                <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2 list-disc pl-4">
+                  <li>Ensure your school code is shared with new staff/students correctly.</li>
+                  <li>Upload a high-quality logo for documentation.</li>
+                  <li>Keep contact information up to date for notifications.</li>
+                </ul>
               </div>
             </div>
-
-            {/* Basic Info */}
-            <div className="bg-card border rounded-xl p-6 space-y-4">
-              <h3 className="font-semibold">Basic Information</h3>
-              <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>School Name *</Label>
-                  <Input
-                    value={form.name}
-                    onChange={(e) => handleChange("name", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>School Code</Label>
-                  <Input value={school?.code || ""} disabled className="bg-muted" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email *</Label>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Phone</Label>
-                  <Input
-                    value={form.phone}
-                    onChange={(e) => handleChange("phone", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Address */}
-            <div className="bg-card border rounded-xl p-6 space-y-4">
-              <h3 className="font-semibold">Address</h3>
-              <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Street Address</Label>
-                  <Input
-                    value={form.address}
-                    onChange={(e) => handleChange("address", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Input
-                    value={form.city}
-                    onChange={(e) => handleChange("city", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>State</Label>
-                  <Input
-                    value={form.state}
-                    onChange={(e) => handleChange("state", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Country</Label>
-                  <Input
-                    value={form.country}
-                    onChange={(e) => handleChange("country", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Institute Profile */}
-            <div className="bg-card border rounded-xl p-6 space-y-4">
-              <h3 className="font-semibold">Institute Profile</h3>
-              <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Established Year</Label>
-                  <Input
-                    type="number"
-                    placeholder="e.g. 1995"
-                    value={form.estdYear}
-                    onChange={(e) => handleChange("estdYear", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Board / Affiliation</Label>
-                  <Select
-                    value={["CBSE", "ICSE", "State Board", "IB", "Cambridge"].includes(form.board) ? form.board : "Other"}
-                    onValueChange={(v) => {
-                      if (v === "Other") {
-                        handleChange("board", ""); // Clear to allow typing custom board
-                      } else {
-                        handleChange("board", v);
-                      }
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select board" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="CBSE">CBSE</SelectItem>
-                      <SelectItem value="ICSE">ICSE</SelectItem>
-                      <SelectItem value="State Board">State Board</SelectItem>
-                      <SelectItem value="IB">IB</SelectItem>
-                      <SelectItem value="Cambridge">Cambridge</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {/* Show input if custom board (not in standard list) or user explicitly selected Other (which sets it to empty string initially) */}
-                  {(!["CBSE", "ICSE", "State Board", "IB", "Cambridge"].includes(form.board)) && (
-                    <Input
-                      placeholder="Enter Board Name"
-                      value={form.board}
-                      onChange={(e) => handleChange("board", e.target.value)}
-                      className="mt-2"
-                      autoFocus
-                    />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label>Affiliation Number</Label>
-                  <Input
-                    placeholder="e.g. 3430256"
-                    value={form.affiliationNo}
-                    onChange={(e) => handleChange("affiliationNo", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Website</Label>
-                  <Input
-                    type="url"
-                    placeholder="e.g. https://myschool.edu.in"
-                    value={form.website}
-                    onChange={(e) => handleChange("website", e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2 md:col-span-2">
-                  <Label>Motto / Tagline</Label>
-                  <Input
-                    placeholder="e.g. Knowledge is Power"
-                    value={form.motto}
-                    onChange={(e) => handleChange("motto", e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <Button type="submit" size="lg" disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
-          </form>
-        </TabsContent>
-
-        <TabsContent value="academic">
-          <div className="bg-card border rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold">Academic Year Settings</h3>
-            <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
-              <div className="space-y-2">
-                <Label>Academic Year Starts</Label>
-                <Select
-                  value={form.academicYearStart}
-                  onValueChange={(v) => handleChange("academicYearStart", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="january">January</SelectItem>
-                    <SelectItem value="april">April</SelectItem>
-                    <SelectItem value="june">June</SelectItem>
-                    <SelectItem value="september">September</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Timezone</Label>
-                <Select
-                  value={form.timezone}
-                  onValueChange={(v) => handleChange("timezone", v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Asia/Kolkata">Asia/Kolkata (IST)</SelectItem>
-                    <SelectItem value="UTC">UTC</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Button onClick={handleSubmit} disabled={saving}>
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
           </div>
         </TabsContent>
 
-        <TabsContent value="billing">
-          <div className="bg-card border rounded-xl p-6 space-y-4">
-            <h3 className="font-semibold">Current Plan</h3>
-            <div className="flex items-center gap-4 p-4 bg-primary/5 rounded-lg border border-primary/20">
-              <div className="flex-1">
-                <p className="font-semibold text-lg">{planLabel}</p>
-                <p className="text-sm text-muted-foreground">
-                  {school?.subscriptionPlan === "pro"
-                    ? "Unlimited students · Advanced reports · Priority support"
-                    : school?.subscriptionPlan === "enterprise"
-                      ? "Everything in Pro · Custom integrations · Dedicated support"
-                      : "Up to 500 students · Basic reports · Email support"}
+        <TabsContent value="academic" className="space-y-6">
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+               <AcademicSettingsForm
+                initialData={school || undefined}
+                onSubmit={updateSchool}
+                isLoading={saving}
+              />
+            </div>
+             <div className="space-y-6">
+              <div className="bg-orange-50/50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900 p-4 rounded-xl">
+                <h4 className="font-semibold text-orange-900 dark:text-orange-100 mb-2">
+                  Academic Cycle
+                </h4>
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  Changing the academic year start month will affect how semesters and financial years are calculated in reports.
                 </p>
               </div>
-              <Button variant="outline">Manage Subscription</Button>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Status: <span className="font-medium capitalize">{school?.subscriptionStatus}</span>
-            </p>
+           </div>
+        </TabsContent>
+
+        <TabsContent value="billing" className="space-y-6">
+          <div className="max-w-2xl">
+            <BillingCard
+              plan={school?.subscriptionPlan || "basic"}
+              status={school?.subscriptionStatus || "active"}
+            />
           </div>
         </TabsContent>
       </Tabs>
