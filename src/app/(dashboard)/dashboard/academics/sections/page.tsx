@@ -210,12 +210,11 @@ export default function SectionsPage() {
       <PageHeader
         title={filterClassName ? `Sections – ${filterClassName}` : "Sections"}
         description="Manage sections within your classes"
-        actions={[
-          ...(filterClassId
+        actions={
+          filterClassId
             ? [{ label: "All Sections", icon: ArrowLeft, href: "/dashboard/academics/sections", variant: "outline" as const }]
-            : []),
-          { label: "Add Section", icon: Plus, onClick: openCreateDialog },
-        ]}
+            : undefined
+        }
       />
 
       {/* Status Message */}

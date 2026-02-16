@@ -161,9 +161,6 @@ export default function ClassesPage() {
       <PageHeader
         title="Classes"
         description="Manage your school's academic classes"
-        actions={[
-          { label: "Add Class", icon: Plus, onClick: openCreateDialog },
-        ]}
       />
 
       {/* Status Message */}
@@ -248,6 +245,15 @@ export default function ClassesPage() {
               </Link>
             </div>
           ))}
+
+          {/* Add Class Card */}
+          <button
+            onClick={openCreateDialog}
+            className="border-2 border-dashed border-muted-foreground/20 rounded-xl p-5 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5 transition-all duration-300 min-h-[180px] cursor-pointer"
+          >
+            <Plus className="w-6 h-6" />
+            <span className="text-sm font-medium">Add Class</span>
+          </button>
         </div>
       )}
 
