@@ -1,1 +1,0 @@
-// Students feature - StudentCard component
