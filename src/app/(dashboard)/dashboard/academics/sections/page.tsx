@@ -282,6 +282,8 @@ export default function SectionsPage() {
                   const enrolled = sec.studentCount ?? 0;
                   const percentage = capacity > 0 ? (enrolled / capacity) * 100 : 0;
 
+                  const studentUrl = `/dashboard/students?sectionId=${sec.id}&classId=${sec.classId}&section=${encodeURIComponent(sec.name)}&class=${encodeURIComponent(sec.className)}`;
+
                   return (
                     <div
                       key={sec.id}
@@ -292,12 +294,12 @@ export default function SectionsPage() {
                         <div className="p-2.5 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
                           <LayoutGrid className="w-5 h-5 text-primary" />
                         </div>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8"
-                            onClick={() => openEditDialog(sec)}
+                            onClick={(e) => { e.preventDefault(); openEditDialog(sec); }}
                             id={`edit-section-${sec.id}`}
                           >
                             <Pencil className="w-3.5 h-3.5" />
@@ -306,7 +308,7 @@ export default function SectionsPage() {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => openDeleteDialog(sec)}
+                            onClick={(e) => { e.preventDefault(); openDeleteDialog(sec); }}
                             id={`delete-section-${sec.id}`}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -314,30 +316,32 @@ export default function SectionsPage() {
                         </div>
                       </div>
 
-                      {/* Section Name */}
-                      <h4 className="font-semibold text-lg">Section {sec.name}</h4>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {className} – {sec.name}
-                      </p>
+                      {/* Clickable Section Body */}
+                      <Link href={studentUrl} className="block">
+                        <h4 className="font-semibold text-lg">Section {sec.name}</h4>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {sec.className} – {sec.name}
+                        </p>
 
-                      {/* Capacity Bar */}
-                      <div className="mt-4 space-y-2">
-                        <div className="flex items-center justify-between text-sm">
-                          <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <Users className="w-3.5 h-3.5" />
-                            <span>Students</span>
+                        {/* Capacity Bar */}
+                        <div className="mt-4 space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <div className="flex items-center gap-1.5 text-muted-foreground">
+                              <Users className="w-3.5 h-3.5" />
+                              <span>Students</span>
+                            </div>
+                            <span className="font-medium text-xs">
+                              {enrolled} / {capacity}
+                            </span>
                           </div>
-                          <span className="font-medium text-xs">
-                            {enrolled} / {capacity}
-                          </span>
+                          <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                              style={{ width: `${percentage}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-                          <div
-                            className="h-full rounded-full bg-primary/70 transition-all duration-500"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                      </div>
+                      </Link>
                     </div>
                   );
                 })}

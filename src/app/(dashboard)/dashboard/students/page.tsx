@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { Plus, MoreHorizontal, Eye, Trash2, ArrowUpDown, Loader2 } from "lucide-react";
+import { Plus, MoreHorizontal, Eye, Trash2, ArrowUpDown, Loader2, ArrowLeft } from "lucide-react";
 import { PageHeader, DataTable } from "@/components/dashboard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -32,6 +33,12 @@ import {
 } from "@/lib/validators/studentsApi";
 
 export default function StudentsPage() {
+  const searchParams = useSearchParams();
+  const sectionId = searchParams.get("sectionId");
+  const classId = searchParams.get("classId");
+  const sectionName = searchParams.get("section");
+  const className = searchParams.get("class");
+
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -40,18 +47,26 @@ export default function StudentsPage() {
   const fetchStudents = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await getStudents();
+      const params: Record<string, string> = {};
+      if (sectionId) params.sectionId = sectionId;
+      if (classId) params.classId = classId;
+      const res = await getStudents(params);
       setStudents(res.data || []);
     } catch (error) {
       console.error("Failed to fetch students:", error);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [sectionId, classId]);
 
   useEffect(() => {
     fetchStudents();
   }, [fetchStudents]);
+
+  const isFiltered = !!(sectionId || classId);
+  const filterLabel = sectionName && className
+    ? `${className} – ${sectionName}`
+    : "Filtered";
 
   const handleDelete = async () => {
     if (!deleteId) return;
@@ -195,8 +210,16 @@ export default function StudentsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
+        {isFiltered && (
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/dashboard/academics/sections">
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back to Sections
+            </Link>
+          </Button>
+        )}
         <PageHeader
-          title="Students"
+          title={isFiltered ? `Students – ${filterLabel}` : "Students"}
           description="Manage student admissions, profiles, and records"
           actions={[{ label: "Add Student", icon: Plus, href: "/dashboard/students/new" }]}
         />
@@ -209,8 +232,16 @@ export default function StudentsPage() {
 
   return (
     <div className="space-y-6">
+      {isFiltered && (
+        <Button variant="outline" size="sm" asChild>
+          <Link href="/dashboard/academics/sections">
+            <ArrowLeft className="w-4 h-4 mr-1" />
+            Back to Sections
+          </Link>
+        </Button>
+      )}
       <PageHeader
-        title="Students"
+        title={isFiltered ? `Students – ${filterLabel}` : "Students"}
         description="Manage student admissions, profiles, and records"
         actions={[{ label: "Add Student", icon: Plus, href: "/dashboard/students/new" }]}
       />
