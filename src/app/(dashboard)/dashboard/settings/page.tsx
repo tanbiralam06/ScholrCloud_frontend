@@ -96,7 +96,7 @@ export default function SettingsPage() {
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <div className="lg:col-span-2 space-y-6">
               <SchoolProfileForm
                 initialData={school || undefined}
@@ -104,7 +104,7 @@ export default function SettingsPage() {
                 isLoading={saving}
               />
             </div>
-            <div className="space-y-6">
+            <div className="lg:sticky lg:top-6 space-y-6">
               <div className="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900 p-4 rounded-xl">
                 <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
                   Profile Tips
