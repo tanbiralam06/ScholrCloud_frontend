@@ -57,6 +57,7 @@ interface SectionItem {
   maxStudents: number | null;
   classTeacherId: string | null;
   createdAt: string;
+  studentCount: number;
 }
 
 export default function SectionsPage() {
@@ -278,7 +279,7 @@ export default function SectionsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {secs.map((sec) => {
                   const capacity = sec.maxStudents ?? 40;
-                  const enrolled = 0; // placeholder until student enrollment
+                  const enrolled = sec.studentCount ?? 0;
                   const percentage = capacity > 0 ? (enrolled / capacity) * 100 : 0;
 
                   return (
