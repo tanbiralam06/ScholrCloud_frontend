@@ -11,7 +11,6 @@ import {
   Wallet,
   Settings,
   LogOut,
-  Bell,
   ChevronLeft,
   ChevronRight,
   School,
@@ -19,11 +18,11 @@ import {
   ChevronDown,
   Layers,
   Database,
+  User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { ThemeToggle } from "@/components/common";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -135,23 +134,23 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
       <aside
         className={cn(
           "h-screen bg-card border-r flex flex-col transition-all duration-300",
-          collapsed ? "w-16" : "w-56"
+          collapsed ? "w-14" : "w-52"
         )}
       >
         {/* Logo + Expand Button */}
         <div
           className={cn(
-            "h-14 flex items-center border-b",
-            collapsed ? "justify-center px-2" : "justify-between px-3"
+            "h-12 flex items-center border-b",
+            collapsed ? "justify-center px-1" : "justify-between px-3"
           )}
         >
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
-              <GraduationCap className="w-5 h-5 text-primary" />
+            <div className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+              <GraduationCap className="w-4 h-4 text-primary" />
             </div>
             {!collapsed && (
-              <span className="text-lg font-bold bg-gradient-to-r from-primary to-[var(--accent-teal)] bg-clip-text text-transparent">
-                SMS
+              <span className="text-base font-bold bg-gradient-to-r from-primary to-[var(--accent-teal)] bg-clip-text text-transparent">
+                Scholrcloud
               </span>
             )}
           </Link>
@@ -168,7 +167,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-2 px-2 space-y-1 overflow-y-auto">
+        <nav className="flex-1 py-1.5 px-1.5 space-y-0.5 overflow-y-auto">
           {filteredNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
@@ -184,11 +183,11 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                       <Button
                         variant="ghost"
                         className={cn(
-                          "w-full h-10 justify-center relative",
+                          "w-full h-9 justify-center relative",
                           active && "bg-primary text-primary-foreground shadow-md shadow-primary/25"
                         )}
                       >
-                        <Icon className="w-5 h-5 flex-shrink-0" />
+                        <Icon className="w-4 h-4 flex-shrink-0" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="right" align="start" className="w-48 ml-2">
@@ -213,13 +212,13 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center justify-center h-10 rounded-lg transition-all duration-200",
+                        "flex items-center justify-center h-9 rounded-lg transition-all duration-200",
                         active
                           ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
                           : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
                     >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      <Icon className="w-4 h-4 flex-shrink-0" />
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent side="right" sideOffset={10}>
@@ -242,12 +241,12 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full justify-between h-10 px-3",
+                        "w-full justify-between h-9 px-2.5 text-sm",
                         active ? "text-primary bg-primary/10" : "text-muted-foreground hover:bg-muted hover:text-foreground"
                       )}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className="w-5 h-5" />
+                      <div className="flex items-center gap-2.5">
+                        <Icon className="w-4 h-4" />
                         <span className="font-medium">{item.label}</span>
                       </div>
                       <ChevronDown
@@ -266,7 +265,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                           key={child.href}
                           href={child.href}
                           className={cn(
-                            "flex items-center h-9 pl-11 pr-3 rounded-lg text-sm transition-colors",
+                            "flex items-center h-8 pl-9 pr-3 rounded-lg text-[13px] transition-colors",
                             childActive
                               ? "bg-primary/10 text-primary font-medium"
                               : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -286,13 +285,13 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-3 px-3 h-10 rounded-lg transition-all duration-200",
+                  "flex items-center gap-2.5 px-2.5 h-9 rounded-lg text-sm transition-all duration-200",
                   active
                     ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
+                <Icon className="w-4 h-4 flex-shrink-0" />
                 <span className="font-medium">{item.label}</span>
               </Link>
             );
@@ -300,7 +299,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="py-2 px-2 space-y-1 border-t">
+        <div className="py-1.5 px-1.5 space-y-0.5 border-t">
           {/* Expand Button (when collapsed) */}
           {collapsed && (
             <Tooltip>
@@ -308,7 +307,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="w-full h-10"
+                  className="w-full h-9"
                   onClick={() => onCollapsedChange?.(false)}
                 >
                   <ChevronRight className="w-4 h-4" />
@@ -320,40 +319,14 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
             </Tooltip>
           )}
 
-          {/* Theme Toggle */}
-          <div className={cn("flex", collapsed ? "justify-center" : "px-1")}>
-            <ThemeToggle />
-          </div>
-
-          {/* Notifications */}
-          {collapsed ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-full h-10 relative">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-2 right-3 w-2 h-2 bg-destructive rounded-full" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right" sideOffset={10}>
-                Notifications
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <Button variant="ghost" className="w-full h-10 justify-start gap-3 px-3 relative">
-              <Bell className="w-5 h-5" />
-              <span className="font-medium">Notifications</span>
-              <span className="absolute top-2 left-7 w-2 h-2 bg-destructive rounded-full" />
-            </Button>
-          )}
-
           {/* Profile */}
           <DropdownMenu>
             {collapsed ? (
               <Tooltip>
                 <TooltipTrigger asChild>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="w-full h-10 p-0">
-                      <Avatar className="h-8 w-8">
+                    <Button variant="ghost" className="w-full h-9 p-0">
+                      <Avatar className="h-7 w-7">
                         <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
                         <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                           {userInitials}
@@ -368,15 +341,15 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
               </Tooltip>
             ) : (
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="w-full h-10 justify-start gap-3 px-3">
-                  <Avatar className="h-7 w-7">
+                <Button variant="ghost" className="w-full h-9 justify-start gap-2.5 px-2.5">
+                  <Avatar className="h-6 w-6">
                     <AvatarImage src="/placeholder-avatar.jpg" alt="User" />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+                    <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
                       {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="text-left">
-                    <p className="text-sm font-medium">{displayRole}</p>
+                    <p className="text-xs font-medium">{displayRole}</p>
                   </div>
                 </Button>
               </DropdownMenuTrigger>
@@ -390,11 +363,17 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">Profile Settings</Link>
+                <Link href="/dashboard/settings?tab=profile" className="flex items-center cursor-pointer">
+                  <User className="w-4 h-4 mr-2" />
+                  Profile Settings
+                </Link>
               </DropdownMenuItem>
               {userRole !== "super_admin" && (
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/settings">School Settings</Link>
+                  <Link href="/dashboard/settings?tab=school" className="flex items-center cursor-pointer">
+                    <School className="w-4 h-4 mr-2" />
+                    School Settings
+                  </Link>
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />

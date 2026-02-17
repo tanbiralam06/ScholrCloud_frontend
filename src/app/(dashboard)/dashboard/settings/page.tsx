@@ -1,15 +1,75 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SchoolProfileForm } from "@/components/dashboard/settings/SchoolProfileForm";
 import { AcademicSettingsForm } from "@/components/dashboard/settings/AcademicSettingsForm";
 import { BillingCard } from "@/components/dashboard/settings/BillingCard";
 import { useSchoolSettings } from "@/hooks/use-school-settings";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sun, Moon, Monitor } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+
+function ThemeSelector() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+  if (!mounted) return null;
+
+  const options = [
+    { value: "light", label: "Light", icon: Sun, description: "Classic light interface" },
+    { value: "dark", label: "Dark", icon: Moon, description: "Easy on the eyes" },
+    { value: "system", label: "System", icon: Monitor, description: "Match your device settings" },
+  ];
+
+  return (
+    <div className="bg-card border rounded-xl p-6 space-y-4">
+      <div>
+        <h3 className="font-semibold">Appearance</h3>
+        <p className="text-sm text-muted-foreground mt-1">
+          Choose how the application looks for you
+        </p>
+      </div>
+      <Separator />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {options.map((opt) => {
+          const Icon = opt.icon;
+          const isActive = theme === opt.value;
+          return (
+            <button
+              key={opt.value}
+              onClick={() => setTheme(opt.value)}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200
+                ${isActive
+                  ? "border-primary bg-primary/5 shadow-sm"
+                  : "border-transparent bg-muted/50 hover:bg-muted hover:border-muted-foreground/20"
+                }`}
+            >
+              <div className={`p-2.5 rounded-lg ${isActive ? "bg-primary/10" : "bg-background"}`}>
+                <Icon className={`w-5 h-5 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+              </div>
+              <span className={`text-sm font-medium ${isActive ? "text-primary" : ""}`}>{opt.label}</span>
+              <span className="text-xs text-muted-foreground text-center">{opt.description}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+
+  // Map query param values to tab values
+  const defaultTab = tabParam === "school" ? "profile"
+    : tabParam === "profile" ? "preferences"
+    : "profile";
+
   const { school, loading, saving, updateSchool } = useSchoolSettings();
 
   if (loading && !school) {
@@ -27,10 +87,11 @@ export default function SettingsPage() {
         description="Manage your school profile, academic preferences, and billing."
       />
 
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="bg-card border p-1 h-auto">
           <TabsTrigger value="profile" className="px-4 py-2">School Profile</TabsTrigger>
-          <TabsTrigger value="academic" className="px-4 py-2">Academic & Preferences</TabsTrigger>
+          <TabsTrigger value="preferences" className="px-4 py-2">Preferences</TabsTrigger>
+          <TabsTrigger value="academic" className="px-4 py-2">Academic</TabsTrigger>
           <TabsTrigger value="billing" className="px-4 py-2">Billing & Plans</TabsTrigger>
         </TabsList>
 
@@ -55,6 +116,12 @@ export default function SettingsPage() {
                 </ul>
               </div>
             </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="preferences" className="space-y-6">
+          <div className="max-w-2xl space-y-6">
+            <ThemeSelector />
           </div>
         </TabsContent>
 
