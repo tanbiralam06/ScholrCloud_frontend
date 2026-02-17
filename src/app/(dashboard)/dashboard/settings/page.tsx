@@ -6,7 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SchoolProfileForm } from "@/components/dashboard/settings/SchoolProfileForm";
 import { AcademicSettingsForm } from "@/components/dashboard/settings/AcademicSettingsForm";
 import { BillingCard } from "@/components/dashboard/settings/BillingCard";
+import { AccountProfileCard } from "@/components/dashboard/settings/AccountProfileCard";
 import { useSchoolSettings } from "@/hooks/use-school-settings";
+import { useAccountProfile } from "@/hooks/use-account-profile";
 import { Loader2, Sun, Moon, Monitor } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
@@ -66,13 +68,14 @@ export default function SettingsPage() {
   const tabParam = searchParams.get("tab");
 
   // Map query param values to tab values
-  const defaultTab = tabParam === "school" ? "profile"
-    : tabParam === "profile" ? "preferences"
-    : "profile";
+  const defaultTab = tabParam === "school" ? "school-profile"
+    : tabParam === "profile" || tabParam === "account" ? "account"
+    : "account";
 
   const { school, loading, saving, updateSchool } = useSchoolSettings();
+  const { profile, loading: profileLoading, saving: profileSaving, updateProfile } = useAccountProfile();
 
-  if (loading && !school) {
+  if ((loading && !school) || (profileLoading && !profile)) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -89,13 +92,30 @@ export default function SettingsPage() {
 
       <Tabs defaultValue={defaultTab} className="space-y-6">
         <TabsList className="bg-card border p-1 h-auto">
-          <TabsTrigger value="profile" className="px-4 py-2">School Profile</TabsTrigger>
+          <TabsTrigger value="account" className="px-4 py-2">Account</TabsTrigger>
+          <TabsTrigger value="school-profile" className="px-4 py-2">School Profile</TabsTrigger>
           <TabsTrigger value="preferences" className="px-4 py-2">Preferences</TabsTrigger>
           <TabsTrigger value="academic" className="px-4 py-2">Academic</TabsTrigger>
           <TabsTrigger value="billing" className="px-4 py-2">Billing & Plans</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="profile" className="space-y-6">
+        <TabsContent value="account" className="space-y-6">
+          <div className="max-w-3xl">
+            {profile ? (
+              <AccountProfileCard
+                profile={profile}
+                onSubmit={updateProfile}
+                isLoading={profileSaving}
+              />
+            ) : (
+              <div className="bg-card border rounded-xl p-8 text-center text-muted-foreground">
+                Unable to load your profile.
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="school-profile" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <div className="lg:col-span-2 space-y-6">
               <SchoolProfileForm

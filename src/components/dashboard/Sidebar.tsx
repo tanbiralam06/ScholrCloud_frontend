@@ -363,7 +363,7 @@ export function Sidebar({ collapsed = true, onCollapsedChange }: SidebarProps) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings?tab=profile" className="flex items-center cursor-pointer">
+                <Link href="/dashboard/settings?tab=account" className="flex items-center cursor-pointer">
                   <User className="w-4 h-4 mr-2" />
                   Profile Settings
                 </Link>
