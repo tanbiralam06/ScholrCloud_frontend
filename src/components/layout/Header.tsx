@@ -47,7 +47,7 @@ export default function Header() {
               <GraduationCap className="w-6 h-6 text-primary" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-[var(--accent-teal)] bg-clip-text text-transparent">
-              SMS SaaS
+              Scholrcloud
             </span>
           </Link>
 
