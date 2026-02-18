@@ -13,6 +13,7 @@ import { Loader2, Sun, Moon, Monitor } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { USER_ROLES } from "@/lib/constants";
 
 function ThemeSelector() {
   const { theme, setTheme } = useTheme();
@@ -122,6 +123,7 @@ export default function SettingsPage() {
                 initialData={school || undefined}
                 onSubmit={updateSchool}
                 isLoading={saving}
+                readOnly={profile?.role !== USER_ROLES.SCHOOL_ADMIN}
               />
             </div>
             <div className="lg:sticky lg:top-6 space-y-6">

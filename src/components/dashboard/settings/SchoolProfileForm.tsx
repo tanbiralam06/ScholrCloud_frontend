@@ -33,9 +33,10 @@ interface SchoolProfileFormProps {
   };
   onSubmit: (data: SchoolProfileFormValues) => Promise<void>;
   isLoading: boolean;
+  readOnly?: boolean;
 }
 
-export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolProfileFormProps) {
+export function SchoolProfileForm({ initialData, onSubmit, isLoading, readOnly = false }: SchoolProfileFormProps) {
   const form = useForm<SchoolProfileFormValues>({
     resolver: zodResolver(schoolProfileSchema) as any,
     defaultValues: initialData || {
@@ -76,10 +77,12 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
               </AvatarFallback>
             </Avatar>
             <div className="space-y-2">
-              <Button variant="outline" type="button">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Logo
-              </Button>
+              {!readOnly && (
+                <Button variant="outline" type="button">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Logo
+                </Button>
+              )}
               <p className="text-xs text-muted-foreground">
                 Recommended: 200x200px, PNG or JPG
               </p>
@@ -99,7 +102,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>School Name *</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,7 +121,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>Email *</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Input type="email" {...field} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,7 +134,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>Phone</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} value={field.value || ""} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -153,7 +156,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                   <FormItem>
                     <FormLabel>Street Address</FormLabel>
                     <FormControl>
-                      <Input {...field} value={field.value || ""} />
+                      <Input {...field} value={field.value || ""} disabled={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -167,7 +170,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>City</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} value={field.value || ""} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -180,7 +183,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>State</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} value={field.value || ""} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -193,7 +196,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>Country</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value || ""} />
+                    <Input {...field} value={field.value || ""} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -220,6 +223,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                       {...field}
                       value={field.value || ""}
                       onChange={(e) => field.onChange(e.target.valueAsNumber || null)}
+                      disabled={readOnly}
                     />
                   </FormControl>
                   <FormMessage />
@@ -245,7 +249,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                       }}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={readOnly}>
                           <SelectValue placeholder="Select board" />
                         </SelectTrigger>
                       </FormControl>
@@ -265,6 +269,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                         value={field.value || ""}
                         onChange={field.onChange}
                         autoFocus
+                        disabled={readOnly}
                       />
                     )}
                   </div>
@@ -280,7 +285,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>Affiliation Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 3430256" {...field} value={field.value || ""} />
+                    <Input placeholder="e.g. 3430256" {...field} value={field.value || ""} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -294,7 +299,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                 <FormItem>
                   <FormLabel>Website</FormLabel>
                   <FormControl>
-                    <Input type="url" placeholder="https://myschool.edu.in" {...field} value={field.value || ""} />
+                    <Input type="url" placeholder="https://myschool.edu.in" {...field} value={field.value || ""} disabled={readOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -309,7 +314,7 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
                   <FormItem>
                     <FormLabel>Motto / Tagline</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Knowledge is Power" {...field} value={field.value || ""} />
+                      <Input placeholder="e.g. Knowledge is Power" {...field} value={field.value || ""} disabled={readOnly} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -319,19 +324,21 @@ export function SchoolProfileForm({ initialData, onSubmit, isLoading }: SchoolPr
           </div>
         </div>
 
-        <Button type="submit" size="lg" disabled={isSubmitting || isLoading}>
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            <>
-              <Save className="w-4 h-4 mr-2" />
-              Save Changes
-            </>
-          )}
-        </Button>
+        {!readOnly && (
+          <Button type="submit" size="lg" disabled={isSubmitting || isLoading}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4 mr-2" />
+                Save Changes
+              </>
+            )}
+          </Button>
+        )}
       </form>
     </Form>
   );
